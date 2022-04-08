@@ -14,9 +14,8 @@ import 'pages/unknown_page.dart';
 
 class MyAppRouterDelegate extends RouterDelegate<MyAppConfiguration>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<MyAppConfiguration> {
-  
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
-  
+
   final AuthRepository authRepository;
   final ColorsRepository colorsRepository;
 
@@ -74,7 +73,7 @@ class MyAppRouterDelegate extends RouterDelegate<MyAppConfiguration>
   @override
   GlobalKey<NavigatorState> get navigatorKey => _navigatorKey;
 
-  MyAppRouterDelegate(this.authRepository, this.colorsRepository) {
+  MyAppRouterDelegate(this.authRepository,this.colorsRepository) {
     _init();
   }
 

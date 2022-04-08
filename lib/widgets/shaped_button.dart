@@ -26,7 +26,7 @@ class ShapedButton extends StatelessWidget {
           primary: color,
           shape: shapeBorderType.getShapeBorder() as OutlinedBorder?,
         ),
-        onPressed: onPressed == null ? () {} : onPressed,
+        onPressed: onPressed ?? () {},
         child: ColoredText(
           color: color,
           text: text ?? shapeBorderType.stringRepresentation(),

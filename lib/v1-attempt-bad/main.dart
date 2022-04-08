@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:navigation2/v1-attempt-bad/nav.dart';
-import 'package:navigation2/v1-attempt-bad/screens/screens.dart';
 
 void main() {
   runApp(const MyApp());
@@ -36,5 +35,4 @@ class _MyAppState extends State<MyApp> {
         routeInformationParser: _routeInformationParser,
         routerDelegate: _routerDelegate);
   }
-
 }

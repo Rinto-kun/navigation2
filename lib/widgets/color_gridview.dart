@@ -33,7 +33,7 @@ class ColorGrid extends StatelessWidget {
         );
       },
       shrinkWrap: true,
-      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: 200,
         crossAxisSpacing: AppDimens.SIZE_SPACING_MEDIUM,
         mainAxisSpacing: AppDimens.SIZE_SPACING_MEDIUM,

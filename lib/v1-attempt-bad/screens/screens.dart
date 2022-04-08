@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return const Center(child: Text("This is the login page!"));
@@ -117,6 +117,22 @@ class RequestScreen extends StatefulWidget {
 class _RequestScreenState extends State<RequestScreen> {
   @override
   Widget build(BuildContext context) {
-    return  const Center(child: Text("This is requests page!"));
+    return const Center(child: Text("This is requests page!"));
+  }
+}
+
+class Error404Screen extends StatefulWidget {
+  const Error404Screen({Key? key}) : super(key: key);
+
+  @override
+  State<Error404Screen> createState() => _Error404ScreenState();
+}
+
+class _Error404ScreenState extends State<Error404Screen> {
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text("ERROR 404"),
+    );
   }
 }

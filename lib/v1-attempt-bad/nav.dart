@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:navigation2/stolen_demo/router/pages/home_page.dart';
 import 'package:navigation2/v1-attempt-bad/screens/screens.dart';
 import 'paths.dart';
 
@@ -150,7 +149,7 @@ class CustomRouterDelegate extends RouterDelegate<CustomRoutePath>
     } else if (path is OffersPath) {
       appState.selectedIndex = 1;
     } else if (path is AccountPath) {
-      appState.selectedIndex = 4;
+      appState.selectedIndex = 3;
     }
   }
 }
@@ -223,6 +222,7 @@ class _AppShellState extends State<AppShell> {
         currentIndex: appState.selectedIndex,
         onTap: (newIndex) {
           appState.selectedIndex = newIndex;
+          print(appState.selectedIndex);
         },
       ),
     );
@@ -251,18 +251,48 @@ class InnerRouterDelegate extends RouterDelegate<CustomRoutePath>
   Widget build(BuildContext context) {
     return Navigator(
       key: navigatorKey,
-      pages: [
-        if (appState.selectedIndex == 0)
-            ...[
-              const FadeAnimationPage(
-                child: RequestScreen(),
-                key: ValueKey('RequestsScreen'),
-              ),
-            ]
+      pages: [ // ...[] Extends the list 
+        if (appState.selectedIndex == 0) ...[
+          const FadeAnimationPage(
+            key: ValueKey("RequestScreen"), 
+            child: RequestsScreen()
+          ),
+
+          // Here list the stack of particular screens like the details for an offer, etc.
+        ] 
+        
+        else if(appState.selectedIndex == 1) ...[
+          const FadeAnimationPage(
+            key: ValueKey("OffersScreen"), 
+            child: OffersScreen()
+          ),
+
+        ]
+        
+        else if(appState.selectedIndex==2)...[
+          const FadeAnimationPage(
+            key: ValueKey("HistoryScreen"),
+            child: HistoryScreen()
+          ),
+        ]
+
+        else if(appState.selectedIndex==3)...[
+          const FadeAnimationPage(
+            key: ValueKey("AccountScreen"), 
+            child: AccountScreen()
+          ),
+        ]
+
+        else if(appState.selectedIndex == 4) ...[
+          const FadeAnimationPage(
+            key: ValueKey("LoginScreen"), 
+            child: LoginScreen())
+        ]
+
         else
           const FadeAnimationPage(
-            child: AccountScreen(),
-            key: ValueKey('AccountScreen'),
+            child: Error404Screen(),
+            key: ValueKey('Error404Screen'),
           ),
       ],
       onPopPage: (route, result) {
