@@ -13,7 +13,7 @@ import 'router/my_app_route_information_parser.dart';
 
 
 void main() {
-  // Sets the URL for working with browsers.
+  // Removes the # in the URL.
   if(kIsWeb) setUrlStrategy(PathUrlStrategy());
 
   runApp(const MyApp());
@@ -31,7 +31,7 @@ class _MyAppState extends State<MyApp> {
   late MyAppRouteInformationParser parser;
   late AuthRepository authRepository;
   late ColorsRepository colorsRepository;
-
+  
   @override
   void initState() {
     super.initState();

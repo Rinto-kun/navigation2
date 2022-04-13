@@ -1,15 +1,17 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:navigation2/v1-attempt-bad/nav.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:navigation2/v1-attempt-bad/navigation/app_state.dart';
+import 'package:navigation2/v1-attempt-bad/navigation/route_information_parser.dart';
+import 'package:url_strategy/url_strategy.dart';
+
+import 'navigation/app_router.dart';
 
 void main() {
+  /// Removes the # from the web URL.
+  if(kIsWeb) setPathUrlStrategy();
+
   runApp(const MyApp());
-}
-
-class Book {
-  final String title;
-  final String author;
-
-  Book(this.title, this.author);
 }
 
 class MyApp extends StatefulWidget {
@@ -20,19 +22,26 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final CustomRouterDelegate _routerDelegate = CustomRouterDelegate();
-  final CustomRouteInformationParser _routeInformationParser = CustomRouteInformationParser();
+  /// Contains the state of the application.
+  final AppState _appState = AppState();
 
-  bool onPopPage(Route<dynamic> route, dynamic result) {
-    return true;
+  /// Manages the central navigation
+  late AppRouter _routerDelegate;
+
+  /// Responsible for interpreting the route information and restoring it from state.
+  final CustomRouteInformationParser _routeInformationParser =
+      CustomRouteInformationParser();
+
+  @override
+  void initState() {
+    _routerDelegate = AppRouter(_appState);
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp.router(
-        title: "Navigation",
-        routeInformationParser: _routeInformationParser,
-        routerDelegate: _routerDelegate);
+      routerDelegate: _routerDelegate,
+      routeInformationParser: _routeInformationParser,);
   }
 }

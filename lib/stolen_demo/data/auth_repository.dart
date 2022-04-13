@@ -1,5 +1,6 @@
 import 'package:common/cache/preference.dart';
 
+// ignore: constant_identifier_names
 const String _AUTH_KEY = 'AuthKey';
 
 class AuthRepository {
