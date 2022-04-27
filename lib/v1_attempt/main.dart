@@ -1,8 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_web_plugins/flutter_web_plugins.dart';
-import 'package:navigation2/v1-attempt-bad/navigation/app_state.dart';
-import 'package:navigation2/v1-attempt-bad/navigation/route_information_parser.dart';
+import 'navigation/app_state.dart';
+import 'navigation/route_information_parser.dart';
 import 'package:url_strategy/url_strategy.dart';
 
 import 'navigation/app_router.dart';
@@ -40,8 +39,10 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
+    return 
+    MaterialApp.router(
       routerDelegate: _routerDelegate,
-      routeInformationParser: _routeInformationParser,);
+      routeInformationParser: _routeInformationParser,
+      backButtonDispatcher: RootBackButtonDispatcher(),);
   }
 }

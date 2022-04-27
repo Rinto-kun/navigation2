@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import '../navigation/route_information_parser.dart';
+import 'package:navigation2/v1_attempt/navigation/fade_animation.dart';
+import '../constants/paths.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({Key? key}) : super(key: key);
 
-  static MaterialPage page() {
-    return const MaterialPage(
-      name: Paths.splash,
+  static FadeAnimationPage page() {
+    return const FadeAnimationPage(
+      // name: Paths.splash,
         key: ValueKey(Paths.splash),
         child: SplashScreen(),
     );

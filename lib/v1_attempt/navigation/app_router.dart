@@ -1,17 +1,18 @@
-
 import 'package:flutter/material.dart';
+import 'route_information_parser.dart';
 import '../models/offer.dart';
+import '../screens/login_screen.dart';
 import '../screens/splash_screen.dart';
-import 'paths.dart';
+import 'fade_animation.dart';
 import '../screens/screens.dart';
 import 'app_state.dart';
 
-class AppRouter extends RouterDelegate<CustomRoutePath>
-    with ChangeNotifier, PopNavigatorRouterDelegateMixin<CustomRoutePath> {
+class AppRouter extends RouterDelegate<AppState>
+    with ChangeNotifier, PopNavigatorRouterDelegateMixin<AppState> {
   @override
   final GlobalKey<NavigatorState> navigatorKey;
 
-  AppState appState;
+  late AppState appState;
 
   AppRouter(this.appState) : navigatorKey = GlobalKey<NavigatorState>() {
     appState.addListener(notifyListeners);
@@ -20,23 +21,8 @@ class AppRouter extends RouterDelegate<CustomRoutePath>
   @override
   void dispose() {
     appState.removeListener(notifyListeners);
-
     super.dispose();
   }
-
-  // @override
-  // BookRoutePath get currentConfiguration {
-  //   if (appState.selectedIndex == 1) {
-  //     return BooksSettingsPath();
-  //   } else {
-  //     if (appState.selectedBook == null) {
-  //       return BooksListPath();
-  //     } else {
-  //       return BooksDetailsPath(appState.getSelectedBookById());
-  //     }
-  //   }
-  // }
-
 
   @override
   Widget build(BuildContext context) {
@@ -44,13 +30,17 @@ class AppRouter extends RouterDelegate<CustomRoutePath>
       key: navigatorKey,
       pages: [
         /// Show the splash screen when the app isn't initialized.
-        if(!appState.isInitialized) SplashScreen.page()
-
-        else if(!appState.loginStatus) LoginScreen(onLogin: appState.logout).page()
-        
-        else MaterialPage(
-          child: AppShell(appState: appState),
-        ),
+        if (!appState.isInitialized)
+          SplashScreen.page()
+        else if (!appState.loggedIn)
+          LoginScreen(
+                  onLoginUser: appState.loginUser,
+                  onLoginEmployee: appState.loginEmployee)
+              .page()
+        else
+          MaterialPage(
+            child: AppShell(appState: this.appState),
+          ),
       ],
       onPopPage: _onPopPage,
     );
@@ -60,35 +50,33 @@ class AppRouter extends RouterDelegate<CustomRoutePath>
     if (!route.didPop(result)) {
       return false;
     }
-
-    // 5
-    // TODO: Handle Onboarding and splash
     // TODO: Handle state when user closes grocery item screen
     // TODO: Handle state when user closes profile screen
-    // TODO: Handle state when user closes WebView screen
 
     notifyListeners();
     return true;
   }
 
   @override
-  Future<void> setNewRoutePath(CustomRoutePath configuration) async {
-    var path = configuration;
-    if (path is HomePath) {
+  Future<void> setNewRoutePath(AppState path) async {
+    print("Set new route path " + path.toString());
+    if (path.isHome()) {
       appState.selectedTab = 0;
-    } else if (path is OffersPath) {
+    } else if (path.isOffersScreen()) {
       appState.selectedTab = 1;
-    } else if (path is RequestsPath) {
-      appState.selectedTab = 0;
-    } else if (path is HistoryPath) {
+    } else if (path.isHistoryScreen()) {
       appState.selectedTab = 2;
-    } else if (path is AccountPath) {
+    } else if (path.isAccountScreen()) {
       appState.selectedTab = 3;
-    } else if (path is LoginPath) {
-      appState.selectedTab = 4;
+    } else if (path.isSplash()) {
+      appState.isInitialized = false;
+    } else if (path.isLogin()) {
+      appState.loggedIn = false;
+      appState.isInitialized = true;
     } else {
-      appState.selectedTab = 999;
+      appState.isUnknown = true;
     }
+    notifyListeners();
   }
 }
 
@@ -111,12 +99,14 @@ class _AppShellState extends State<AppShell> {
 
   @override
   void initState() {
+    print("init appshell");
     super.initState();
     _routerDelegate = InnerRouterDelegate(widget.appState);
   }
 
   @override
-  void didUpdateWidget(covariant AppShell oldWidget) {
+  void didUpdateWidget(AppShell oldWidget) {
+    print("did update");
     super.didUpdateWidget(oldWidget);
     _routerDelegate.appState = widget.appState;
   }
@@ -132,8 +122,6 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
-    var appState = widget.appState;
-
     // Claim priority, If there are parallel sub router, you will need
     // to pick which one should take priority;
     _backButtonDispatcher.takePriority();
@@ -142,42 +130,40 @@ class _AppShellState extends State<AppShell> {
       appBar: AppBar(),
       body: Router(
         routerDelegate: _routerDelegate,
-        // backButtonDispatcher: _backButtonDispatcher,
+        // routeInformationParser: CustomRouteInformationParser(),
+        backButtonDispatcher: _backButtonDispatcher,
       ),
-      bottomNavigationBar:
-          (appState.selectedTab >= 0 && appState.selectedTab < 4)
-              ? BottomNavigationBar(
-                  showUnselectedLabels: true,
-                  type: BottomNavigationBarType.fixed,
-                  // backgroundColor: Color.fromARGB(255, 0, 0, 0),
-                  items: const [
-                    BottomNavigationBarItem(
-                        icon: Icon(Icons.home_outlined), label: 'Home'),
-                    BottomNavigationBarItem(
-                        icon: Icon(Icons.handyman_outlined), label: "Offers"),
-                    BottomNavigationBarItem(
-                        icon: Icon(Icons.history), label: "History"),
-                    BottomNavigationBarItem(
-                        icon: Icon(Icons.person_outline), label: 'Account'),
-                  ],
-                  currentIndex: appState.selectedTab,
-                  onTap: (newIndex) {
-                    appState.selectedTab = newIndex;
-                  },
-                )
-              : null,
+      bottomNavigationBar: BottomNavigationBar(
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
+        // backgroundColor: Color.fromARGB(255, 0, 0, 0),
+        items: const [
+          BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined), label: 'Home'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.handyman_outlined), label: "Offers"),
+          BottomNavigationBarItem(icon: Icon(Icons.history), label: "History"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline), label: 'Account'),
+        ],
+        currentIndex: widget.appState.selectedTab,
+        onTap: _handleItemTapped,
+      ),
     );
+  }
+
+  void _handleItemTapped(int newIndex) {
+    widget.appState.selectedTab = newIndex;
   }
 }
 
-class InnerRouterDelegate extends RouterDelegate<CustomRoutePath>
-    with ChangeNotifier, PopNavigatorRouterDelegateMixin<CustomRoutePath> {
+class InnerRouterDelegate extends RouterDelegate<AppState>
+    with ChangeNotifier, PopNavigatorRouterDelegateMixin<AppState> {
   @override
-  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  final GlobalKey<NavigatorState> navigatorKey;
 
-  AppState _appState;
+  late AppState _appState;
   AppState get appState => _appState;
-
   set appState(AppState value) {
     if (value == _appState) {
       return;
@@ -186,7 +172,8 @@ class InnerRouterDelegate extends RouterDelegate<CustomRoutePath>
     notifyListeners();
   }
 
-  InnerRouterDelegate(this._appState);
+  InnerRouterDelegate(this._appState)
+      : navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) {
@@ -200,7 +187,7 @@ class InnerRouterDelegate extends RouterDelegate<CustomRoutePath>
 
           if (appState.offerId != null)
             FadeAnimationPage(
-                key: ValueKey("OfferDetails${appState.offerId}"), 
+                key: ValueKey("OfferDetails${appState.offerId}"),
                 child: OfferDetailsScreen(data: OfferDetails.demo()))
 
           // Here list the stack of particular screens like the details for an offer, etc.
@@ -210,27 +197,17 @@ class InnerRouterDelegate extends RouterDelegate<CustomRoutePath>
         ] else if (appState.selectedTab == 2) ...[
           const FadeAnimationPage(
               key: ValueKey("HistoryScreen"), child: HistoryScreen()),
-
-            if (appState.offerId != null)
+          if (appState.offerId != null)
             FadeAnimationPage(
-                key: ValueKey("OfferDetails${appState.offerId}"), 
+                key: ValueKey("OfferDetails${appState.offerId}"),
                 child: OfferDetailsScreen(data: OfferDetails.demo()))
-
         ] else if (appState.selectedTab == 3) ...[
           const FadeAnimationPage(
               key: ValueKey("AccountScreen"), child: AccountScreen()),
-
           if (appState.offerId != null)
             FadeAnimationPage(
-                key: ValueKey("OfferDetails${appState.offerId}"), 
+                key: ValueKey("OfferDetails${appState.offerId}"),
                 child: OfferDetailsScreen(data: OfferDetails.demo()))
-
-        ] else if (appState.selectedTab == 4) ...[
-          FadeAnimationPage(
-              key: const ValueKey("LoginScreen"),
-              child: LoginScreen(onLogin: () {
-                appState.selectedTab = 0;
-              }))
         ] else
           const FadeAnimationPage(
             child: Error404Screen(),
@@ -246,35 +223,9 @@ class InnerRouterDelegate extends RouterDelegate<CustomRoutePath>
   }
 
   @override
-  Future<void> setNewRoutePath(CustomRoutePath configuration) async {
+  Future<void> setNewRoutePath(AppState configuration) async {
     // This is not required for inner router delegate because it does not
     // parse route
     assert(false);
-  }
-
-  // void _handleBookTapped(Book book) {
-  //   appState.selectedBook = book;
-  //   notifyListeners();
-  // }
-}
-
-class FadeAnimationPage extends Page {
-  final Widget child;
-
-  const FadeAnimationPage({required LocalKey key, required this.child})
-      : super(key: key);
-
-  @override
-  Route createRoute(BuildContext context) {
-    return PageRouteBuilder(
-      settings: this,
-      pageBuilder: (context, animation, animation2) {
-        var curveTween = CurveTween(curve: Curves.easeIn);
-        return FadeTransition(
-          opacity: animation.drive(curveTween),
-          child: child,
-        );
-      },
-    );
   }
 }
